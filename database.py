@@ -23,8 +23,8 @@ class Database():
         message = f'''CREATE TABLE {self.db} 
                     (SID INT PRIMARY KEY NOT NULL AUTO INCREMENT, 
                     CREATED_AT DATETIME NOT NULL,
-                    TIME_START DATETIME NOT NULL,
-                    TIME_END DATETIME NOT NULL)'''
+                    TIME_START DATETIME,
+                    TIME_END DATETIME)'''
         try:
             self.write(message)
             return True

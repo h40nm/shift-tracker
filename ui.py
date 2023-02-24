@@ -40,9 +40,34 @@ class App():
         self.frame.grid(row=0, column=0, sticky="NESW")
 
     def show_add_frame(self):
-        self.frame = tk.Frame(self.app, background="red")
-        label = tk.Label(self.app, text=f"{datetime.now()}")
-        label.grid(row=0, column=0, sticky="NESW")
+        self.frame = tk.Frame(self.app, bg="black")
+
+        start = tk.Label(self.app, text="Uhrzeit Beginn:")
+        ende = tk.Label(self.app, text="Uhrzeit Ende:")
+        h1 = tk.Label(self.app, text="h")
+        h2 = tk.Label(self.app, text="h")
+        m1 = tk.Label(self.app, text="min")
+        m2 = tk.Label(self.app, text="min")
+
+        h1_entry = tk.Entry(self.app)
+        h2_entry = tk.Entry(self.app)
+        m1_entry = tk.Entry(self.app)
+        m2_entry = tk.Entry(self.app)
+
+        add = tk.Button(self.app, text="Eintrag hinzufügen")
+        
+        start.grid(row=0, column=0, sticky="NESW")
+        ende.grid(row=1, column=0, sticky="NESW")
+        h1_entry.grid(row=0, column=1, sticky="NESW")
+        h1.grid(row=0, column=2, sticky="NESW")
+        m1_entry.grid(row=0, column=3, sticky="NESW")
+        m1.grid(row=0, column=4, sticky="NESW")
+        h2_entry.grid(row=1, column=1, sticky="NESW")
+        h2.grid(row=1, column=2, sticky="NESW")
+        m2_entry.grid(row=1, column=3, sticky="NESW")
+        m2.grid(row=1, column=4, sticky="NESW")
+        add.grid(row=2, column=0, sticky="NESW")
+
         self.frame.grid(row=0, column=0, sticky="NESW")
 
     def show_stats_frame(self) -> tk.Frame:

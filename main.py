@@ -18,8 +18,11 @@
 ## Config in Datenbank definieren, schreiben und lesen
 
 from ui import App
+from datetime import *
+
 
 
 if __name__=="__main__":
-    app = App()
-    
+    #app = App()
+    print(date.today())
+    print(datetime.now().time().strftime("%H-%M-%S"))
