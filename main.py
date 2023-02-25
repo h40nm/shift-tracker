@@ -23,10 +23,12 @@ from datetime import *
 
 
 if __name__=="__main__":
-    #app = App()
+    app = App()
+    '''
     print(date.today())
     print(datetime.now().time().strftime("%H-%M-%S"))
     datum = "09-15"
     datum = f"{date.today()} {datum}"
     date_time = datetime.strptime(datum, "%Y-%m-%d %H-%M")
     print(date_time)
+    '''

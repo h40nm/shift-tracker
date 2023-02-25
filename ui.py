@@ -1,16 +1,20 @@
 import tkinter as tk
+from tkinter import ttk
 from config import Config
 from logger import Logger
 from database import Database
+from frame_add import Frame_Add
+from frame_overview import Frame_Overview
 
 from datetime import datetime
+from datetime import date
 
 class App():
     def __init__(self):
         self.app = tk.Tk()
         self.config = Config()
         self.Logger = Logger(self.config.get_config())
-        self.database = Database(self.config.get_config())
+        self.frame = tk.Frame(self.app)
 
         self.configure_window()
         self.configure_menubar()
@@ -26,48 +30,30 @@ class App():
 
     def configure_menubar(self):
         self.menubar = tk.Menu(self.app)
-        self.menubar.add_command(label="Hinzufügen", command=self.show_add_frame)
-        self.menubar.add_command(label="Statistik", command=self.show_stats_frame)
-        self.menubar.add_command(label="Exportieren", command=self.show_export_frame)
-        self.menubar.add_command(label="Beenden", command=self.destroy)
+        self.menubar.add_command(label="Add", command=self.show_add_frame)
+        self.menubar.add_command(label="Overview", command=self.show_overview_frame)
+        self.menubar.add_command(label="Statistics", command=self.show_stats_frame)
+        self.menubar.add_command(label="Export", command=self.show_export_frame)
+        self.menubar.add_command(label="Quit", command=self.destroy)
         self.app.config(menu = self.menubar)
 
     def destroy(self):
         self.app.destroy()
 
-    def change_frame(self, frame: tk.Frame) -> bool:
-        self.frame = frame
+    def show_add_frame(self):
+        try:
+            self.frame.__del__()
+        except Exception as e:
+            print(e)
+        self.frame = Frame_Add(self.app, self.config.get_config())
         self.frame.grid(row=0, column=0, sticky="NESW")
 
-    def show_add_frame(self):
-        self.frame = tk.Frame(self.app, bg="black")
-
-        start = tk.Label(self.app, text="Uhrzeit Beginn:")
-        ende = tk.Label(self.app, text="Uhrzeit Ende:")
-        h1 = tk.Label(self.app, text="h")
-        h2 = tk.Label(self.app, text="h")
-        m1 = tk.Label(self.app, text="min")
-        m2 = tk.Label(self.app, text="min")
-
-        h1_entry = tk.Entry(self.app)
-        h2_entry = tk.Entry(self.app)
-        m1_entry = tk.Entry(self.app)
-        m2_entry = tk.Entry(self.app)
-
-        add = tk.Button(self.app, text="Eintrag hinzufügen")
-        
-        start.grid(row=0, column=0, sticky="NESW")
-        ende.grid(row=1, column=0, sticky="NESW")
-        h1_entry.grid(row=0, column=1, sticky="NESW")
-        h1.grid(row=0, column=2, sticky="NESW")
-        m1_entry.grid(row=0, column=3, sticky="NESW")
-        m1.grid(row=0, column=4, sticky="NESW")
-        h2_entry.grid(row=1, column=1, sticky="NESW")
-        h2.grid(row=1, column=2, sticky="NESW")
-        m2_entry.grid(row=1, column=3, sticky="NESW")
-        m2.grid(row=1, column=4, sticky="NESW")
-        add.grid(row=2, column=0, sticky="NESW")
-
+    def show_overview_frame(self):
+        try:
+            self.frame.__del__()
+        except Exception as e:
+            print(e)
+        self.frame = Frame_Overview(self.app, self.config.get_config())
         self.frame.grid(row=0, column=0, sticky="NESW")
 
     def show_stats_frame(self) -> tk.Frame:
