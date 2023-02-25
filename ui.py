@@ -15,6 +15,13 @@ class App():
         self.config = Config()
         self.Logger = Logger(self.config.get_config())
         self.frame = tk.Frame(self.app)
+        self.spacer1 = tk.Label(self.app, text="", width=int(self.app.winfo_width()/4))
+        self.spacer2 = tk.Label(self.app, text="", width=int(self.app.winfo_width()/4))
+        self.app.columnconfigure(0, weight=10)
+        self.app.columnconfigure(1, weight=1)
+        self.app.columnconfigure(2, weight=10)
+        self.spacer1.grid(row=0, column=0, sticky="NESW")
+        self.spacer2.grid(row=0, column=2, sticky="NESW")
 
         self.configure_window()
         self.configure_menubar()
@@ -46,7 +53,7 @@ class App():
         except Exception as e:
             print(e)
         self.frame = Frame_Add(self.app, self.config.get_config())
-        self.frame.grid(row=0, column=0, sticky="NESW")
+        self.frame.grid(row=0, column=1, sticky="NESW")
 
     def show_overview_frame(self):
         try:
@@ -54,7 +61,7 @@ class App():
         except Exception as e:
             print(e)
         self.frame = Frame_Overview(self.app, self.config.get_config())
-        self.frame.grid(row=0, column=0, sticky="NESW")
+        self.frame.grid(row=0, column=1, sticky="NESW")
 
     def show_stats_frame(self) -> tk.Frame:
         self.frame = tk.Frame(self.app)

@@ -15,9 +15,9 @@ class Database():
             print("CONNECTED TO DB.")
         else:
             if self.create_shifts_table():
-                print(f"Created Database {self.db}.")
+                print(f"Created table{self.db}.")
             else:
-                print(f"Database {self.db} could not be found nor created.")
+                print(f"Table {self.db} could not be found nor created.")
             return True
 
     def create_shifts_table(self) -> bool:

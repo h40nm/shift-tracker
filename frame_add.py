@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
+from datetime import timedelta
 from database import Database
 
 class Frame_Add(tk.Frame):
@@ -87,6 +88,9 @@ class Frame_Add(tk.Frame):
         elif start_datetime == end_datetime:
             self.label_warning.config(text="WARNING: End time is not set yet!")
             self.label_warning.config(fg="orange")
+        elif end_datetime - start_datetime >= timedelta(hours=24):
+            self.label_warning.config(text="WARNING: You cannot work more than 24h!")
+            self.label_warning.config(fg="red")
         else:
             if  self.database.log_shift(start_datetime, end_datetime) == True:
                 self.label_warning.config(text="Shift saved successfully.")
