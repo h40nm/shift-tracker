@@ -65,7 +65,7 @@ class App():
         except Exception as e:
             print(e)
         self.frame = Frame_Overview(self.app, self.config.get_config())
-        self.frame.grid(row=0, column=1, sticky="NESW")
+        self.frame.grid(row=0, column=1, sticky="EW")
 
     def show_stats_frame(self) -> tk.Frame:
         self.frame = tk.Frame(self.app)

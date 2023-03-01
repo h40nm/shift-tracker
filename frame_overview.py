@@ -23,7 +23,7 @@ class Frame_Overview(tk.Frame):
         self.combobox_filter.grid(row=0, column=1, sticky="NESW")
         self.label_filter_2.grid(row=0, column=2, sticky="NESW")
 
-        self.shifts_per_page = 10
+        self.shifts_per_page = 15
         self.page_count = 1
         self.page_current = 1
 
@@ -44,7 +44,6 @@ class Frame_Overview(tk.Frame):
         for shift in result:
             self.list_shifts.append(shift)
 
-        self.page_count = int(len(self.list_shifts)/self.shifts_per_page) +1
 
     def calculate_work_sum(self):
         self.work_sum = timedelta(days=0)
@@ -77,50 +76,46 @@ class Frame_Overview(tk.Frame):
 
             row += 1
 
-        while row < 11:
+        while row < self.shifts_per_page+1:
             label_fill = tk.Label(self.container, text="")
             label_fill.grid(row=row, column=0)
             row += 1
 
-
+        text_work_sum = tk.Label(self.container, text="Total work sum:")
         label_work_sum = tk.Label(self.container, text=self.work_sum)
+        text_work_sum.grid(row=row+1, column=3, sticky="NESW")
         label_work_sum.grid(row=row+1, column=4, sticky="NESW")
 
     def get_entries_from_last_x_days(self, days: int):
         return datetime.now() - timedelta(days=days)
     
     def update(self, event=None):
+
+        if event!=None:
+            self.page_current = 1
+
         self.update_container()
         self.create_header()
         self.get_entries()
         self.calculate_work_sum()
         self.render_entries()
+        self.update_page_count()
         self.set_bg_color(self)
         self.set_bg_color(self.container)
-        self.label_page_count.configure(text=f"page {self.page_current} of {self.page_count}")
+
 
     def next(self, direction=1):
-        if self.page_current < self.page_count:
-            self.page_current += direction
-            self.button_prev.configure(state="active")
-        
-        if self.page_current+1 >= self.page_count:
-            self.button_next.configure(state="disabled")
-
+        self.configure_buttons(direction)
         self.update()
     
     def prev(self, direction=-1):
-        if self.page_current > 1:
-            self.page_current += direction
-            self.button_next.configure(state="active")
-        
-        if self.page_current-1 <= 1:
-            self.button_prev.configure(state="disabled")
+        self.configure_buttons(direction)
         self.update()
 
     def update_container(self):
         try:
             self.container.destroy()
+            self.list_shifts.clear()
         except:
             pass
         self.container = tk.Frame(self, relief="ridge", borderwidth="2")
@@ -138,6 +133,33 @@ class Frame_Overview(tk.Frame):
         self.label_start.grid(row=0, column=2, sticky="NESW")
         self.label_end.grid(row=0, column=3, sticky="NESW")
         self.label_worked.grid(row=0, column=4, sticky="NESW")
+
+    def update_page_count(self):
+        if len(self.list_shifts) % self.shifts_per_page == 0:
+            self.page_count = int(len(self.list_shifts)/self.shifts_per_page)
+        else:
+            self.page_count = int(len(self.list_shifts)/self.shifts_per_page)+1
+        self.label_page_count.configure(text=f"page {self.page_current} of {self.page_count}")
+
+    def configure_buttons(self, direction):
+        print(self.page_current+1)
+        #TODO
+        if self.page_current+1 >= self.page_count:
+            self.button_next.configure(state="disabled")
+
+            if self.page_current-1 >= 1:
+                self.button_prev.configure(state="active")
+        else:
+            self.button_next.configure(state="active")
+
+        if self.page_current-1 <= 1:
+            self.button_prev.configure(state="disabled")
+        else:
+            self.button_prev.configure(state="active")
+
+        if self.page_current+direction >=1 and self.page_current+direction <= self.page_count:
+            self.page_current += direction
+    
     
     def set_bg_color(self, container, color="white"):
         container.configure(bg=color)
