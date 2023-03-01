@@ -64,7 +64,7 @@ class App():
             self.frame.__del__()
         except Exception as e:
             print(e)
-        self.frame = Frame_Shift_View(self.app, self.config.get_config())
+        self.frame = Frame_Overview(self.app, self.config.get_config())
         self.frame.grid(row=0, column=1, sticky="NESW")
 
     def show_stats_frame(self) -> tk.Frame:

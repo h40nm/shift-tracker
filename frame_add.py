@@ -125,7 +125,7 @@ class Frame_Add(tk.Frame):
             next_hour = next_hour + 1
 
         self.combobox_start_minute.current(pos)
-        self.combobox_start_day.current(self.combobox_start_day["values"].index(datetime.now().strftime("%d")))
+        self.combobox_start_day.current(int(datetime.now().strftime("%d"))-1)
         self.combobox_start_month.current(self.combobox_start_month["values"].index(datetime.now().strftime("%m")))
         self.combobox_start_year.current(self.combobox_start_year["values"].index(datetime.now().strftime("%Y")))
         self.combobox_start_hour.current(next_hour)
@@ -144,7 +144,7 @@ class Frame_Add(tk.Frame):
             next_hour = next_hour + 1
 
         self.combobox_end_minute.current(pos)
-        self.combobox_end_day.current(self.combobox_end_day["values"].index(datetime.now().strftime("%d")))
+        self.combobox_end_day.current(int(datetime.now().strftime("%d"))-1)
         self.combobox_end_month.current(self.combobox_end_month["values"].index(datetime.now().strftime("%m")))
         self.combobox_end_year.current(self.combobox_end_year["values"].index(datetime.now().strftime("%Y")))
         self.combobox_end_hour.current(next_hour)

@@ -11,76 +11,63 @@ class Frame_Overview(tk.Frame):
         tk.Frame.__init__(self, self.master)
         self.database = Database(config)
 
-        self.label_id = tk.Label(self, text="ID")
-        self.label_created_at = tk.Label(self, text="STARTING AT")
-        self.label_start = tk.Label(self, text="START")
-        self.label_end = tk.Label(self, text="END")
-        self.label_worked = tk.Label(self, text="WORK TIME")
         self.label_filter_1 = tk.Label(self, text="Filter last")
         self.label_filter_2 = tk.Label(self, text="days")
         self.combobox_filter = ttk.Combobox(self, width=5)
         self.combobox_filter["values"] = list(range(0, 10001))
         self.combobox_filter.current(30)
-        self.combobox_filter.bind("<<ComboboxSelected>>", self.show_entries)
-        self.combobox_filter.bind("<Return>", self.show_entries)
-        self.scrollbar = tk.Scrollbar(self)
+        self.combobox_filter.bind("<<ComboboxSelected>>", self.update)
+        self.combobox_filter.bind("<Return>", self.update)
 
         self.label_filter_1.grid(row=0, column=0, sticky="NESW")
         self.combobox_filter.grid(row=0, column=1, sticky="NESW")
         self.label_filter_2.grid(row=0, column=2, sticky="NESW")
-        self.label_id.grid(row=1, column=0, sticky="NESW")
-        self.label_created_at.grid(row=1, column=1, sticky="NESW")
-        self.label_start.grid(row=1, column=2, sticky="NESW")
-        self.label_end.grid(row=1, column=3, sticky="NESW")
-        self.label_worked.grid(row=1, column=4, sticky="NESW")
-        self.scrollbar.grid(row=0, column=5, sticky="NS")
 
-        self.show_entries()
+        self.shifts_per_page = 10
+        self.page_count = 1
+        self.page_current = 1
 
-    def set_bg_color(self, color="white"):
-        self.configure(bg=color)
-        for row in range(100):
-            for column in range(100):
-                try:
-                    widget = self.grid_slaves(row=row, column=column)[0]
-                    widget.configure(bg=color)
-                except:
-                    continue
+        self.button_next = tk.Button(self, text="►", command=self.next)
+        self.button_prev = tk.Button(self, text="◄", command=self.prev, state="disabled")
+        self.label_page_count = tk.Label(self, text=f"page {self.page_current} of {self.page_count}")
 
-    def show_entries(self, event=None):
+        self.button_next.grid(row=2, column=1, sticky="NESW")
+        self.button_prev.grid(row=2, column=0, sticky="NESW")
+        self.label_page_count.grid(row=2, column=2, sticky="NESW")
+
+        self.update()
+
+    def get_entries(self):
         result = self.database.write(f"SELECT * FROM {self.config['db_shifts']} WHERE TIME_START >= '{self.get_entries_from_last_x_days(int(self.combobox_filter.get()))}'")
-        self.work_sum = timedelta(days=0)
-        try:
-            for elem in self.entries:
-                elem.destroy()
-            self.entries.clear()
-        except Exception as e:
-            self.entries = list()
-
-        row = 2
+        self.list_shifts = []
+        
         for shift in result:
+            self.list_shifts.append(shift)
+
+        self.page_count = int(len(self.list_shifts)/self.shifts_per_page) +1
+
+    def calculate_work_sum(self):
+        self.work_sum = timedelta(days=0)
+
+        for shift in self.list_shifts:
+            self.work_sum += datetime.strptime(shift[3], "%Y-%m-%d %H:%M:%S") - datetime.strptime(shift[2], "%Y-%m-%d %H:%M:%S")
+        self.work_sum = datetime.strptime(str(self.work_sum), "%H:%M:%S").strftime("%H:%M")
+
+    def render_entries(self):
+        row = 1
+        render_list = self.list_shifts[(self.page_current-1)*self.shifts_per_page:self.page_current*self.shifts_per_page]
+        for shift in render_list:
             id = shift[0]
             created = datetime.strptime(shift[2], "%Y-%m-%d %H:%M:%S").strftime("%Y-%m-%d")
-            start = datetime.strptime(shift[2], "%Y-%m-%d %H:%M:%S")
-            end = datetime.strptime(shift[3], "%Y-%m-%d %H:%M:%S")
-            worked = end-start
-            self.work_sum += worked
-            start = start.strftime("%H:%M")
-            end = end.strftime("%H:%M")
-            worked = datetime.strptime(str(worked), "%H:%M:%S")
-            worked = worked.strftime("%H:%M")
+            start = datetime.strptime(shift[2], "%Y-%m-%d %H:%M:%S").strftime("%H:%M")
+            end = datetime.strptime(shift[3], "%Y-%m-%d %H:%M:%S").strftime("%H:%M")
+            worked = datetime.strptime(str((datetime.strptime(shift[3], "%Y-%m-%d %H:%M:%S") - datetime.strptime(shift[2], "%Y-%m-%d %H:%M:%S"))), "%H:%M:%S").strftime("%H:%M")
 
-            label_id = tk.Label(self, text=id)
-            label_created = tk.Label(self, text=created)
-            label_start = tk.Label(self, text=start)
-            label_end = tk.Label(self, text=end)
-            label_worked = tk.Label(self, text=worked)
-
-            self.entries.append(label_id)
-            self.entries.append(label_created)
-            self.entries.append(label_start)
-            self.entries.append(label_end)
-            self.entries.append(label_worked)
+            label_id = tk.Label(self.container, text=id)
+            label_created = tk.Label(self.container, text=created)
+            label_start = tk.Label(self.container, text=start)
+            label_end = tk.Label(self.container, text=end)
+            label_worked = tk.Label(self.container, text=worked)
 
             label_id.grid(row=row, column=0)
             label_created.grid(row=row, column=1)
@@ -90,15 +77,78 @@ class Frame_Overview(tk.Frame):
 
             row += 1
 
-        label_work_sum = tk.Label(self, text=datetime.strptime(str(self.work_sum), "%H:%M:%S").strftime("%H:%M"))
-        self.entries.append(label_work_sum)
+        while row < 11:
+            label_fill = tk.Label(self.container, text="")
+            label_fill.grid(row=row, column=0)
+            row += 1
+
+
+        label_work_sum = tk.Label(self.container, text=self.work_sum)
         label_work_sum.grid(row=row+1, column=4, sticky="NESW")
-
-        self.set_bg_color()
-
 
     def get_entries_from_last_x_days(self, days: int):
         return datetime.now() - timedelta(days=days)
+    
+    def update(self, event=None):
+        self.update_container()
+        self.create_header()
+        self.get_entries()
+        self.calculate_work_sum()
+        self.render_entries()
+        self.set_bg_color(self)
+        self.set_bg_color(self.container)
+        self.label_page_count.configure(text=f"page {self.page_current} of {self.page_count}")
+
+    def next(self, direction=1):
+        if self.page_current < self.page_count:
+            self.page_current += direction
+            self.button_prev.configure(state="active")
+        
+        if self.page_current+1 >= self.page_count:
+            self.button_next.configure(state="disabled")
+
+        self.update()
+    
+    def prev(self, direction=-1):
+        if self.page_current > 1:
+            self.page_current += direction
+            self.button_next.configure(state="active")
+        
+        if self.page_current-1 <= 1:
+            self.button_prev.configure(state="disabled")
+        self.update()
+
+    def update_container(self):
+        try:
+            self.container.destroy()
+        except:
+            pass
+        self.container = tk.Frame(self, relief="ridge", borderwidth="2")
+        self.container.grid(row=1, column=0, columnspan=4)
+
+    def create_header(self):
+        self.label_id = tk.Label(self.container, text="ID")
+        self.label_created_at = tk.Label(self.container, text="STARTING AT")
+        self.label_start = tk.Label(self.container, text="START")
+        self.label_end = tk.Label(self.container, text="END")
+        self.label_worked = tk.Label(self.container, text="WORK TIME")
+        
+        self.label_id.grid(row=0, column=0, sticky="NESW")
+        self.label_created_at.grid(row=0, column=1, sticky="NESW")
+        self.label_start.grid(row=0, column=2, sticky="NESW")
+        self.label_end.grid(row=0, column=3, sticky="NESW")
+        self.label_worked.grid(row=0, column=4, sticky="NESW")
+    
+    def set_bg_color(self, container, color="white"):
+        container.configure(bg=color)
+        for row in range(100):
+            for column in range(100):
+                try:
+                    widget = container.grid_slaves(row=row, column=column)[0]
+                    widget.configure(bg=color)
+                except:
+                    continue
+
 
     def __del__(self):
         self.database.disconnect()
