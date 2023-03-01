@@ -76,6 +76,18 @@ class Frame_Add(tk.Frame):
         self.button_reset_start.grid(row=1, column=6, sticky="NESW")
         self.button_reset_end.grid(row=2, column=6, sticky="NESW")
 
+        self.set_bg_color()
+
+    def set_bg_color(self, color="white"):
+        self.configure(bg=color)
+        for row in range(100):
+            for column in range(100):
+                try:
+                    widget = self.grid_slaves(row=row, column=column)[0]
+                    widget.configure(bg=color)
+                except:
+                    continue
+
     def add(self):
         start_string = f"{self.combobox_start_year.get()}-{self.combobox_start_month.get()}-{self.combobox_start_day.get()} {self.combobox_start_hour.get()}-{self.combobox_start_minute.get()}"
         start_datetime = datetime.strptime(start_string, "%Y-%m-%d %H-%M")

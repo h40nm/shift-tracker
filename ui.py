@@ -5,6 +5,7 @@ from logger import Logger
 from database import Database
 from frame_add import Frame_Add
 from frame_overview import Frame_Overview
+from frame_shift_view import Frame_Shift_View
 
 from datetime import datetime
 from datetime import date
@@ -22,6 +23,9 @@ class App():
         self.app.columnconfigure(2, weight=10)
         self.spacer1.grid(row=0, column=0, sticky="NESW")
         self.spacer2.grid(row=0, column=2, sticky="NESW")
+        self.app.config(bg="white")
+        self.spacer1.config(bg="white")
+        self.spacer2.config(bg="white")
 
         self.configure_window()
         self.configure_menubar()
@@ -60,7 +64,7 @@ class App():
             self.frame.__del__()
         except Exception as e:
             print(e)
-        self.frame = Frame_Overview(self.app, self.config.get_config())
+        self.frame = Frame_Shift_View(self.app, self.config.get_config())
         self.frame.grid(row=0, column=1, sticky="NESW")
 
     def show_stats_frame(self) -> tk.Frame:

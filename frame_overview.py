@@ -9,7 +9,6 @@ class Frame_Overview(tk.Frame):
         self.master = master
         self.config = config
         tk.Frame.__init__(self, self.master)
-
         self.database = Database(config)
 
         self.label_id = tk.Label(self, text="ID")
@@ -24,6 +23,7 @@ class Frame_Overview(tk.Frame):
         self.combobox_filter.current(30)
         self.combobox_filter.bind("<<ComboboxSelected>>", self.show_entries)
         self.combobox_filter.bind("<Return>", self.show_entries)
+        self.scrollbar = tk.Scrollbar(self)
 
         self.label_filter_1.grid(row=0, column=0, sticky="NESW")
         self.combobox_filter.grid(row=0, column=1, sticky="NESW")
@@ -33,9 +33,19 @@ class Frame_Overview(tk.Frame):
         self.label_start.grid(row=1, column=2, sticky="NESW")
         self.label_end.grid(row=1, column=3, sticky="NESW")
         self.label_worked.grid(row=1, column=4, sticky="NESW")
-
+        self.scrollbar.grid(row=0, column=5, sticky="NS")
 
         self.show_entries()
+
+    def set_bg_color(self, color="white"):
+        self.configure(bg=color)
+        for row in range(100):
+            for column in range(100):
+                try:
+                    widget = self.grid_slaves(row=row, column=column)[0]
+                    widget.configure(bg=color)
+                except:
+                    continue
 
     def show_entries(self, event=None):
         result = self.database.write(f"SELECT * FROM {self.config['db_shifts']} WHERE TIME_START >= '{self.get_entries_from_last_x_days(int(self.combobox_filter.get()))}'")
@@ -83,6 +93,9 @@ class Frame_Overview(tk.Frame):
         label_work_sum = tk.Label(self, text=datetime.strptime(str(self.work_sum), "%H:%M:%S").strftime("%H:%M"))
         self.entries.append(label_work_sum)
         label_work_sum.grid(row=row+1, column=4, sticky="NESW")
+
+        self.set_bg_color()
+
 
     def get_entries_from_last_x_days(self, days: int):
         return datetime.now() - timedelta(days=days)
