@@ -93,6 +93,7 @@ class Frame_Overview(tk.Frame):
 
         if event!=None:
             self.page_current = 1
+            self.configure_buttons()
 
         self.update_container()
         self.create_header()
@@ -108,9 +109,11 @@ class Frame_Overview(tk.Frame):
         self.configure_buttons(direction)
         self.update()
     
+
     def prev(self, direction=-1):
         self.configure_buttons(direction)
         self.update()
+
 
     def update_container(self):
         try:
@@ -120,6 +123,7 @@ class Frame_Overview(tk.Frame):
             pass
         self.container = tk.Frame(self, relief="ridge", borderwidth="2")
         self.container.grid(row=1, column=0, columnspan=4)
+
 
     def create_header(self):
         self.label_id = tk.Label(self.container, text="ID")
@@ -134,33 +138,33 @@ class Frame_Overview(tk.Frame):
         self.label_end.grid(row=0, column=3, sticky="NESW")
         self.label_worked.grid(row=0, column=4, sticky="NESW")
 
+
     def update_page_count(self):
         if len(self.list_shifts) % self.shifts_per_page == 0:
             self.page_count = int(len(self.list_shifts)/self.shifts_per_page)
         else:
             self.page_count = int(len(self.list_shifts)/self.shifts_per_page)+1
+
+        if len(self.list_shifts) == 0:
+            self.page_count = 1
+
         self.label_page_count.configure(text=f"page {self.page_current} of {self.page_count}")
 
-    def configure_buttons(self, direction):
-        print(self.page_current+1)
-        #TODO
-        if self.page_current+1 >= self.page_count:
-            self.button_next.configure(state="disabled")
 
-            if self.page_current-1 >= 1:
-                self.button_prev.configure(state="active")
-        else:
-            self.button_next.configure(state="active")
-
-        if self.page_current-1 <= 1:
-            self.button_prev.configure(state="disabled")
-        else:
-            self.button_prev.configure(state="active")
-
+    def configure_buttons(self, direction=0):
         if self.page_current+direction >=1 and self.page_current+direction <= self.page_count:
             self.page_current += direction
+        
+        if self.page_current == 1:
+            self.button_prev.configure(state="disabled")
+        elif self.page_current > 1:
+            self.button_prev.configure(state="active")
+        if self.page_current == self.page_count:
+            self.button_next.configure(state="disabled")
+        elif self.page_current < self.page_count:
+            self.button_next.configure(state="active")
     
-    
+
     def set_bg_color(self, container, color="white"):
         container.configure(bg=color)
         for row in range(100):
