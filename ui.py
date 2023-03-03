@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from config import Config
-from logger import Logger
 from db import Database
 from frame_add import Frame_Add
 from frame_overview import Frame_Overview
