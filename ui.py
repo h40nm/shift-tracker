@@ -12,7 +12,6 @@ class App():
     def __init__(self):
         self.app = tk.Tk()
         self.config = Config()
-        self.Logger = Logger(self.config.get_config())
         self.frame = tk.Frame(self.app)
         self.spacer1 = tk.Label(self.app, text="", width=int(self.app.winfo_width()/4))
         self.spacer2 = tk.Label(self.app, text="", width=int(self.app.winfo_width()/4))
