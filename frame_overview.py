@@ -23,7 +23,7 @@ class Frame_Overview(tk.Frame):
         self.combobox_filter.grid(row=0, column=1, sticky="NESW")
         self.label_filter_2.grid(row=0, column=2, sticky="NESW")
 
-        self.shifts_per_page = 15
+        self.shifts_per_page = 10
         self.page_count = 1
         self.page_current = 1
 
@@ -35,7 +35,14 @@ class Frame_Overview(tk.Frame):
         self.button_prev.grid(row=2, column=0, sticky="NESW")
         self.label_page_count.grid(row=2, column=2, sticky="NESW")
 
+        self.label_test = tk.Label(self, text="TEST")
+        self.label_test.grid(row=3, column=0, sticky="NESW")
+        self.label_test.bind("<Button-1>", lambda e: self.new_window("clicked"))
+
         self.update()
+
+    def new_window(self, event=None):
+        print(event)
 
     def get_entries(self):
         result = self.database.write(f"SELECT * FROM {self.config['db_shifts']} WHERE TIME_START >= '{self.get_entries_from_last_x_days(int(self.combobox_filter.get()))}'")
@@ -67,6 +74,12 @@ class Frame_Overview(tk.Frame):
             label_start = tk.Label(self.container, text=start)
             label_end = tk.Label(self.container, text=end)
             label_worked = tk.Label(self.container, text=worked)
+
+            label_id.bind("<Button-1>", lambda e: self.new_window(id))
+            label_created.bind("<Button-1>", lambda e: self.new_window(id))
+            label_start.bind("<Button-1>", lambda e: self.new_window(id))
+            label_end.bind("<Button-1>", lambda e: self.new_window(id))
+            label_worked.bind("<Button-1>", lambda e: self.new_window(id))
 
             label_id.grid(row=row, column=0)
             label_created.grid(row=row, column=1)

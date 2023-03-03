@@ -2,7 +2,7 @@ class Config():
     def __init__(self):
         self.config_dict = {
             "width": 640,
-            "height": 480,
+            "height": 720,
             "title": "Worktime Logger v1",
             "db_path": "shifts.db",
             "db_shifts": "db_shifts",
