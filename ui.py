@@ -28,7 +28,7 @@ class App():
 
         self.configure_window()
         self.configure_menubar()
-        self.show_add_frame()
+        self.show_overview_frame()
         self.app.mainloop()
 
     def configure_window(self):
