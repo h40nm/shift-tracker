@@ -7,6 +7,7 @@ class Config():
             "db_path": "shifts.db",
             "db_shifts": "db_shifts",
             "logfile_path": "log.txt",
+            "shifts_per_page": 10,
 
         }
 

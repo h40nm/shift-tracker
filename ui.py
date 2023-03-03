@@ -2,10 +2,9 @@ import tkinter as tk
 from tkinter import ttk
 from config import Config
 from logger import Logger
-from database import Database
+from db import Database
 from frame_add import Frame_Add
 from frame_overview import Frame_Overview
-from frame_shift_view import Frame_Shift_View
 
 from datetime import datetime
 from datetime import date
@@ -65,20 +64,20 @@ class App():
         except Exception as e:
             print(e)
         self.frame = Frame_Overview(self.app, self.config.get_config())
+        #self.frame = frame_edit.Frame_Edit(self.app, self.config.get_config())
         self.frame.grid(row=0, column=1, sticky="EW")
 
     def show_stats_frame(self) -> tk.Frame:
         self.frame = tk.Frame(self.app)
-        self.frame.config(background="blue")
-        label = tk.Label(self.app, text="Statistiken")
+        label = tk.Label(self.frame, text="Statistiken")
         label.grid(row=0, column=0, sticky="NESW")
-        self.frame.grid(row=0, column=0, sticky="NESW")
+        self.frame.grid(row=0, column=1, sticky="NESW")
 
     def show_export_frame(self) -> tk.Frame:
         self.frame = tk.Frame(self.app)
-        label = tk.Label(self.app, text="Exportieren")
+        label = tk.Label(self.frame, text="Exportieren")
         label.grid(row=0, column=0, sticky="NESW")
-        self.frame.grid(row=0, column=0, sticky="NESW")
+        self.frame.grid(row=0, column=1, sticky="NESW")
 '''
 class Window(Tk):
     def __init__(self) -> None:

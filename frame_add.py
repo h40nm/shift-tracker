@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from datetime import datetime
 from datetime import timedelta
-from database import Database
+from db import Database
 
 class Frame_Add(tk.Frame):
     def __init__(self, master, config: dict):
