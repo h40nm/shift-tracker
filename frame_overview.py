@@ -37,7 +37,6 @@ class Frame_Overview(tk.Frame):
         self.label_total = tk.Label(self, text=f"{len(self.list_shifts)} items")
         self.label_page_count = tk.Label(self, text=f"page {self.page_current} of {self.page_count}")
 
-        #self.button_add = tk.Button(self, text="Add", command=self.add_shift)
         self.button_update = tk.Button(self, text="Update", command=self.update_shift)
         self.button_delete = tk.Button(self, text="Delete", command=self.delete_shift)
 
@@ -71,6 +70,8 @@ class Frame_Overview(tk.Frame):
         self.reset_edit_fields()
 
         self.label_update_message = tk.Label(self, text="")
+        self.button_set_now = tk.Button(self, text="Now", command=self.current_datetime)
+        self.button_reset = tk.Button(self, text="Reset", command=self.reset_edit_fields)
         self.button_save = tk.Button(self, text="Save", command=self.save_shift)
 
         self.label_filter_1.grid(row=0, column=0, sticky="NESW")
@@ -82,7 +83,6 @@ class Frame_Overview(tk.Frame):
         self.label_total.grid(row=2, column=2, sticky="NESW")
         self.label_page_count.grid(row=2, column=3, sticky="NESW")
         self.spacer.grid(row=3, column=0, sticky="NESW")
-        #self.button_add.grid(row=4, column=0, sticky="NESW")
         self.button_update.grid(row=4, column=1, sticky="NESW")
         self.button_delete.grid(row=4, column=2, sticky="NESW")
         self.spacer2.grid(row=5, column=0, sticky="NESW")
@@ -99,8 +99,10 @@ class Frame_Overview(tk.Frame):
         self.combobox_edit_end_h.grid(row=10, column=2, sticky="NESW")
         self.combobox_edit_end_m.grid(row=10, column=3, sticky="NESW")
         self.spacer5.grid(row=11, column=0, sticky="NESW")
+        self.button_reset.grid(row=12, column=2, sticky="NESW")
+        self.button_set_now.grid(row=12, column=1, sticky="NESW")
         self.button_save.grid(row=12, column=3, sticky="NESW")
-        self.label_update_message.grid(row=12, column=0, columnspan=2, sticky="NESW")
+        self.label_update_message.grid(row=13, column=1, columnspan=2, sticky="NESW")
 
         self.update()
 
@@ -252,6 +254,7 @@ class Frame_Overview(tk.Frame):
         if self.delete_flag == True:
             sql = f"DELETE FROM {self.config['db_shifts']} WHERE SID=={id}"
             self.database.write(sql)
+            self.label_update_message.configure(text=f"Log {id} deleted successfully!", fg="green")
             self.update()
             self.delete_flag = False
 
@@ -271,8 +274,27 @@ class Frame_Overview(tk.Frame):
                 self.combobox_edit_end_m.current(self.combobox_edit_end_m["values"].index(end.strftime("%M")))
 
 
-    def add_shift(self):
-        pass
+    def current_datetime(self):
+        pos = 0
+        now = datetime.now()
+        date = now.strftime("%Y-%m-%d")
+        hour = int(datetime.now().strftime("%H"))
+        minute = int(datetime.now().strftime("%M"))
+
+        if minute % 15 < 15/2:
+            pos = int(minute/15)
+        else:
+            pos = int(minute/15) + 1
+
+        if pos >= len(self.combobox_edit_start_m["values"]):
+            pos = int(pos) % 4
+            hour = hour + 1
+
+        self.label_edit_created.configure(text=date)
+        self.combobox_edit_start_h.current(hour)
+        self.combobox_edit_start_m.current(pos)
+        self.combobox_edit_end_h.current(hour)
+        self.combobox_edit_end_m.current(pos)
 
     def update_shift(self):
         if self.update_flag == False:
@@ -291,21 +313,25 @@ class Frame_Overview(tk.Frame):
             self.button_delete.configure(bg="white")
 
     def save_shift(self):
-        if self.update_flag == True:
-            start = f"{self.label_edit_created['text']} {self.combobox_edit_start_h.get()}-{self.combobox_edit_start_m.get()}-00"
-            start = datetime.strptime(start, "%Y-%m-%d %H-%M-%S")
-            end = f"{self.label_edit_created['text']} {self.combobox_edit_end_h.get()}-{self.combobox_edit_end_m.get()}-00"
-            end = datetime.strptime(end, "%Y-%m-%d %H-%M-%S")
-
+        start = f"{self.label_edit_created['text']} {self.combobox_edit_start_h.get()}-{self.combobox_edit_start_m.get()}-00"
+        start = datetime.strptime(start, "%Y-%m-%d %H-%M-%S")
+        end = f"{self.label_edit_created['text']} {self.combobox_edit_end_h.get()}-{self.combobox_edit_end_m.get()}-00"
+        end = datetime.strptime(end, "%Y-%m-%d %H-%M-%S")
+        
+        if self.label_edit_id["text"] == "0":
+            self.database.log_shift(start, end)
+            self.label_update_message.configure(text=f"Log added successfully!", fg="green")
+        
+        elif self.update_flag == True:
             sql = f"UPDATE {self.config['db_shifts']} SET TIME_START='{start}', TIME_END='{end}' WHERE SID=={self.label_edit_id['text']}"
             self.database.write(sql)
             self.update()
             self.update_flag = False
 
             self.label_update_message.configure(text=f"Log {self.label_edit_id['text']} updated successfully!", fg="green")
-            self.reset_edit_fields()
-        else:
-            pass
+        self.reset_edit_fields()
+        self.update()
+
 
     def reset_edit_fields(self):
         self.label_edit_id.configure(text="0")
@@ -314,6 +340,11 @@ class Frame_Overview(tk.Frame):
         self.combobox_edit_start_m.current(0)
         self.combobox_edit_end_h.current(0)
         self.combobox_edit_end_m.current(0)
+
+        self.update_flag = False
+        self.delete_flag = False
+        self.button_delete.configure(bg="white")
+        self.button_update.configure(bg="white")
 
     def __del__(self):
         self.database.disconnect()

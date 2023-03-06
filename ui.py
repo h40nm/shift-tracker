@@ -38,7 +38,7 @@ class App():
 
     def configure_menubar(self):
         self.menubar = tk.Menu(self.app)
-        self.menubar.add_command(label="Add", command=self.show_add_frame)
+        #self.menubar.add_command(label="Add", command=self.show_add_frame)
         self.menubar.add_command(label="Overview", command=self.show_overview_frame)
         self.menubar.add_command(label="Statistics", command=self.show_stats_frame)
         self.menubar.add_command(label="Export", command=self.show_export_frame)
