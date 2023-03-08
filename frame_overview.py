@@ -46,11 +46,19 @@ class Frame_Overview(tk.Frame):
         self.label_edit_hend = tk.Label(self, text="END")
 
         self.label_edit_id = tk.Label(self, text="0")
-        self.label_edit_created = tk.Label(self, text="0000-00-00")
+        #self.label_edit_created = tk.Label(self, text="0000-00-00")
+        self.container_edit_date = tk.Frame(self)
+        self.combobox_edit_year = ttk.Combobox(self.container_edit_date, width=5)
+        self.combobox_edit_month = ttk.Combobox(self.container_edit_date, width=3)
+        self.combobox_edit_day = ttk.Combobox(self.container_edit_date, width=3)
         self.combobox_edit_start_h = ttk.Combobox(self, width=3)
         self.combobox_edit_start_m = ttk.Combobox(self, width=3)
         self.combobox_edit_end_h = ttk.Combobox(self, width=3)
         self.combobox_edit_end_m = ttk.Combobox(self, width=3)
+
+        self.combobox_edit_year["values"] = list(range(2000, 2050))
+        self.combobox_edit_month["values"] = list(range(1, 13))
+        self.combobox_edit_day["values"] = list(range(1, 32))
 
         hours_list = list(range(0, 25))
         i = 0
@@ -74,6 +82,10 @@ class Frame_Overview(tk.Frame):
         self.button_reset = tk.Button(self, text="Reset", command=self.reset_edit_fields)
         self.button_save = tk.Button(self, text="Save", command=self.save_shift)
 
+        self.combobox_edit_year.grid(row=0, column=0, sticky="NESW")
+        self.combobox_edit_month.grid(row=0, column=1, sticky="NESW")
+        self.combobox_edit_day.grid(row=0, column=2, sticky="NESW")
+
         self.label_filter_1.grid(row=0, column=0, sticky="NESW")
         self.combobox_filter.grid(row=0, column=1, sticky="NESW")
         self.label_filter_2.grid(row=0, column=2, sticky="NESW")
@@ -93,7 +105,8 @@ class Frame_Overview(tk.Frame):
         self.label_edit_hstart.grid(row=8, column=2, sticky="NESW")
         self.label_edit_hend.grid(row=8, column=3, sticky="NESW")
         self.label_edit_id.grid(row=9, column=0, sticky="NESW")
-        self.label_edit_created.grid(row=9, column=1, sticky="NESW")
+        #self.label_edit_created.grid(row=9, column=1, sticky="NESW")
+        self.container_edit_date.grid(row=9, column=1, sticky="NESW")
         self.combobox_edit_start_h.grid(row=9, column=2, sticky="NESW")
         self.combobox_edit_start_m.grid(row=9, column=3, sticky="NESW")
         self.combobox_edit_end_h.grid(row=10, column=2, sticky="NESW")
@@ -159,7 +172,17 @@ class Frame_Overview(tk.Frame):
 
         for shift in self.list_shifts:
             self.work_sum += datetime.strptime(shift[3], "%Y-%m-%d %H:%M:%S") - datetime.strptime(shift[2], "%Y-%m-%d %H:%M:%S")
-        self.work_sum = datetime.strptime(str(self.work_sum), "%H:%M:%S").strftime("%H:%M")
+
+        self.work_sum = int(self.work_sum.total_seconds())
+        seconds_in_hour = 3600
+        seconds_in_minute = 60
+        hours = int(self.work_sum / seconds_in_hour)
+        minutes = int(self.work_sum % seconds_in_hour)
+        if minutes == 0:
+            minutes = "00"
+        else:
+            minutes = int(minutes / seconds_in_minute)
+        self.work_sum = str(hours) + ":" + str(minutes)
 
     
     def render_entries(self):
@@ -267,7 +290,10 @@ class Frame_Overview(tk.Frame):
                 end = datetime.strptime(shift[3], "%Y-%m-%d %H:%M:%S")
 
                 self.label_edit_id.configure(text=id)
-                self.label_edit_created.configure(text=created.strftime("%Y-%m-%d"))
+                self.combobox_edit_year.current(int(created.strftime("%Y"))-int(self.combobox_edit_year["values"][0]))
+                self.combobox_edit_month.current(int(created.strftime("%m"))-1)
+                self.combobox_edit_day.current(int(created.strftime("%d"))-1)
+                #self.label_edit_created.configure(text=created.strftime("%Y-%m-%d"))
                 self.combobox_edit_start_h.current(self.combobox_edit_start_h["values"].index(start.strftime("%H")))
                 self.combobox_edit_start_m.current(self.combobox_edit_start_m["values"].index(start.strftime("%M")))
                 self.combobox_edit_end_h.current(self.combobox_edit_end_h["values"].index(end.strftime("%H")))
@@ -277,7 +303,10 @@ class Frame_Overview(tk.Frame):
     def current_datetime(self):
         pos = 0
         now = datetime.now()
-        date = now.strftime("%Y-%m-%d")
+        #date = now.strftime("%Y-%m-%d")
+        year = now.strftime("%Y")
+        month = now.strftime("%m")
+        day = now.strftime("%d")
         hour = int(datetime.now().strftime("%H"))
         minute = int(datetime.now().strftime("%M"))
 
@@ -290,7 +319,10 @@ class Frame_Overview(tk.Frame):
             pos = int(pos) % 4
             hour = hour + 1
 
-        self.label_edit_created.configure(text=date)
+        #self.label_edit_created.configure(text=date)
+        self.combobox_edit_year.current(int(year)-int(self.combobox_edit_year["values"][0]))
+        self.combobox_edit_month.current(int(month)-1)
+        self.combobox_edit_day.current(int(day)-1)
         self.combobox_edit_start_h.current(hour)
         self.combobox_edit_start_m.current(pos)
         self.combobox_edit_end_h.current(hour)
@@ -313,9 +345,9 @@ class Frame_Overview(tk.Frame):
             self.button_delete.configure(bg="white")
 
     def save_shift(self):
-        start = f"{self.label_edit_created['text']} {self.combobox_edit_start_h.get()}-{self.combobox_edit_start_m.get()}-00"
+        start = f"{self.combobox_edit_year.get()}-{self.combobox_edit_month.get()}-{self.combobox_edit_day.get()} {self.combobox_edit_start_h.get()}-{self.combobox_edit_start_m.get()}-00"
         start = datetime.strptime(start, "%Y-%m-%d %H-%M-%S")
-        end = f"{self.label_edit_created['text']} {self.combobox_edit_end_h.get()}-{self.combobox_edit_end_m.get()}-00"
+        end = f"{self.combobox_edit_year.get()}-{self.combobox_edit_month.get()}-{self.combobox_edit_day.get()} {self.combobox_edit_end_h.get()}-{self.combobox_edit_end_m.get()}-00"
         end = datetime.strptime(end, "%Y-%m-%d %H-%M-%S")
         
         if self.label_edit_id["text"] == "0":
@@ -335,7 +367,10 @@ class Frame_Overview(tk.Frame):
 
     def reset_edit_fields(self):
         self.label_edit_id.configure(text="0")
-        self.label_edit_created.configure(text="0000-00-00")
+        #self.label_edit_created.configure(text="0000-00-00")
+        self.combobox_edit_year.current(0)
+        self.combobox_edit_month.current(0)
+        self.combobox_edit_day.current(0)
         self.combobox_edit_start_h.current(0)
         self.combobox_edit_start_m.current(0)
         self.combobox_edit_end_h.current(0)
