@@ -4,6 +4,7 @@ from config import Config
 from db import Database
 from frame_add import Frame_Add
 from frame_overview import Frame_Overview
+from frame_export import Frame_Export
 
 from datetime import datetime
 from datetime import date
@@ -40,7 +41,7 @@ class App():
         self.menubar = tk.Menu(self.app)
         #self.menubar.add_command(label="Add", command=self.show_add_frame)
         self.menubar.add_command(label="Overview", command=self.show_overview_frame)
-        self.menubar.add_command(label="Statistics", command=self.show_stats_frame)
+        #self.menubar.add_command(label="Statistics", command=self.show_stats_frame)
         self.menubar.add_command(label="Export", command=self.show_export_frame)
         self.menubar.add_command(label="Quit", command=self.destroy)
         self.app.config(menu = self.menubar)
@@ -71,10 +72,12 @@ class App():
         label.grid(row=0, column=0, sticky="NESW")
         self.frame.grid(row=0, column=1, sticky="NESW")
 
-    def show_export_frame(self) -> tk.Frame:
-        self.frame = tk.Frame(self.app)
-        label = tk.Label(self.frame, text="Exportieren")
-        label.grid(row=0, column=0, sticky="NESW")
+    def show_export_frame(self):
+        try:
+            self.frame.__del__()
+        except Exception as e:
+            print(e)
+        self.frame = Frame_Export(self.app, self.config.get_config())
         self.frame.grid(row=0, column=1, sticky="NESW")
 '''
 class Window(Tk):
