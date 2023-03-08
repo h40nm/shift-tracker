@@ -117,10 +117,10 @@ class Frame_Overview(tk.Frame):
         self.button_save.grid(row=12, column=3, sticky="NESW")
         self.label_update_message.grid(row=13, column=1, columnspan=2, sticky="NESW")
 
-        self.columnconfigure(0, minsize=100)
-        self.columnconfigure(1, minsize=100)
-        self.columnconfigure(2, minsize=100)
-        self.columnconfigure(3, minsize=100)
+        self.columnconfigure(0, minsize=120)
+        self.columnconfigure(1, minsize=120)
+        self.columnconfigure(2, minsize=120)
+        self.columnconfigure(3, minsize=120)
         #self.columnconfigure(2, weight=1)
         self.update()
 
