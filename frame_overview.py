@@ -48,9 +48,9 @@ class Frame_Overview(tk.Frame):
         self.label_edit_id = tk.Label(self, text="0")
         #self.label_edit_created = tk.Label(self, text="0000-00-00")
         self.container_edit_date = tk.Frame(self)
-        self.combobox_edit_year = ttk.Combobox(self.container_edit_date, width=5)
-        self.combobox_edit_month = ttk.Combobox(self.container_edit_date, width=3)
-        self.combobox_edit_day = ttk.Combobox(self.container_edit_date, width=3)
+        self.combobox_edit_year = ttk.Combobox(self.container_edit_date, width=4)
+        self.combobox_edit_month = ttk.Combobox(self.container_edit_date, width=2)
+        self.combobox_edit_day = ttk.Combobox(self.container_edit_date, width=2)
         self.combobox_edit_start_h = ttk.Combobox(self, width=3)
         self.combobox_edit_start_m = ttk.Combobox(self, width=3)
         self.combobox_edit_end_h = ttk.Combobox(self, width=3)
@@ -117,6 +117,11 @@ class Frame_Overview(tk.Frame):
         self.button_save.grid(row=12, column=3, sticky="NESW")
         self.label_update_message.grid(row=13, column=1, columnspan=2, sticky="NESW")
 
+        self.columnconfigure(0, minsize=100)
+        self.columnconfigure(1, minsize=100)
+        self.columnconfigure(2, minsize=100)
+        self.columnconfigure(3, minsize=100)
+        #self.columnconfigure(2, weight=1)
         self.update()
 
 
@@ -142,7 +147,13 @@ class Frame_Overview(tk.Frame):
         except:
             pass
         self.container = tk.Frame(self, relief="ridge", borderwidth="2")
-        self.container.grid(row=1, column=0, columnspan=4)
+        self.container.grid(row=1, column=0, columnspan=4, sticky="EW")
+
+        self.container.columnconfigure(0, weight=1)
+        self.container.columnconfigure(1, weight=1)
+        self.container.columnconfigure(2, weight=1)
+        self.container.columnconfigure(3, weight=1)
+        self.container.columnconfigure(4, weight=1)
 
 
     def create_header(self):
