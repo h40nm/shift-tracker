@@ -3,6 +3,8 @@ from tkinter import ttk
 from datetime import datetime
 from datetime import timedelta
 from db import Database
+import docx
+from docxtpl import DocxTemplate
 
 class Frame_Export(tk.Frame):
     def __init__(self, master, config: dict):
@@ -59,35 +61,146 @@ class Frame_Export(tk.Frame):
                 pass
 
     def export(self):
-        date = self.get_query_date()
-        self.set_feedback_text(f"Querying all working times starting from {date}")
-        work_times = self.get_entries_from_db(date)
-        self.merge_work_times(work_times)
+        date_start, date_end = self.get_query_dates()
+        self.set_feedback_text(f"Starting at {date_start}")
+        work_times = self.get_entries_from_db(date_start, date_end)
+        work = self.merge_work_times(work_times, date_start, date_end)
+        self.write_to_document(work)
         
 
-    def get_query_date(self) -> datetime:
-        month = int(self.combobox_month.get())-1
+    def get_query_dates(self) -> datetime:
+        month = int(self.combobox_month.get())
         year = int(self.combobox_year.get())
+        date_end = f"{year}-{month}-10 00-00-00"
+        month = int(self.combobox_month.get())-1
 
         if month == 0:
             month = 12
             year = year-1
 
-        date = f"{year}-{month}-10 00-00-00"
-        date = datetime.strptime(date, "%Y-%m-%d %H-%M-%S")
-        return date
+        date_start = f"{year}-{month}-10 00-00-00"
+        date_start = datetime.strptime(date_start, "%Y-%m-%d %H-%M-%S")
+        date_end = datetime.strptime(date_end, "%Y-%m-%d %H-%M-%S")
+        return date_start, date_end
     
-    def get_entries_from_db(self, date: datetime) -> list:
-        query = f"SELECT * FROM {self.config['db_shifts']} WHERE TIME_START>='{date}'"
+    def get_entries_from_db(self, date_start: datetime, date_end: datetime) -> list:
+        query = f"SELECT * FROM {self.config['db_shifts']} WHERE TIME_START>='{date_start}' AND TIME_START<'{date_end}'"
         result = self.database.write(query)
-        return result
+        list = []
+        for line in result:
+            list.append(line)
+        return list
 
     def set_feedback_text(self, text: str) -> None:
         self.label_feedback.configure(text=text)
 
-    def merge_work_times(self, work_times: list) -> list:
+    def merge_work_times(self, work_times: list, date_start: datetime, date_end: datetime) -> list: 
+        # generate a dictionary of work times on the same day to prepare further modification
+        temp_dict = {}
         for elem in work_times:
             date = elem[2]
             date = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
             date = date.strftime("%Y-%m-%d")
-            print(date)
+
+            exist_flag = False
+
+            for key in temp_dict.keys():
+                if key == date:
+                    exist_flag = True
+                    break
+
+            if exist_flag == False:
+                temp_dict[date] = []
+
+            temp_dict[date].append(elem)
+
+        # get the total working time, start, end and pause times for each day
+        self.monthly_work_no_breaks = timedelta(days=0)
+        worked_list = []
+        for elem in temp_dict:
+            worked_per_day = timedelta(days=0)
+            time_start = datetime.now()
+            for shift in temp_dict[elem]:
+
+                end = shift[3]
+                start = shift[2]
+                end = datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
+                start = datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
+                delta = end - start
+                worked_per_day += delta
+
+                if start < time_start:
+                    time_start = start
+
+            self.monthly_work_no_breaks += worked_per_day
+            notification = ""
+            time_end = time_start + worked_per_day
+            if timedelta(hours=6) <= worked_per_day < timedelta(hours=9):
+                time_end += timedelta(minutes=30)
+                notification = "Pause: 00:30h"
+            elif timedelta(hours=9) <= worked_per_day:
+                time_end +=  timedelta(hours=1)
+                notification = "Pause: 01:00h"
+
+
+            working_duration = f"{time_start.strftime('%H:%M')} - {time_end.strftime('%H:%M')}"
+            worked_list.append([start.strftime("%Y-%m-%d"), working_duration, worked_per_day, notification])
+
+        # fill the list with blank days with no working times for the entire month
+        dates_list = []
+        date = date_start
+        while date < date_end:
+            date += timedelta(days=1)
+            dates_list.append(date.strftime("%Y-%m-%d"))
+
+        worked = []
+        for date in dates_list:
+            shift = [str(date), " ", " ", " "]
+            for work_day in worked_list:
+                if date == work_day[0]:
+                    shift = [str(date), str(work_day[1]), str(work_day[2]), str(work_day[3])]
+            worked.append(shift)
+
+        for line in worked:
+            print(line)
+
+        return worked
+
+
+    def write_to_document(self, work: list) -> None:
+        template = docx.Document('Stundenzettel.docx')
+
+        #for i, row in enumerate(template.tables[0].rows):
+        #    text = list((cell.text for cell in row.cells))
+        #    print(text)
+
+        year = self.combobox_year.get()
+        month = int(self.combobox_month.get())
+        if month < 10:
+            month = "0" + str(month)
+        date = f"{year}-{month}"
+        filename = f"{date}-Stundenzettel.docx"
+
+        # convert monthly_total work to the right format
+        self.monthly_work_no_breaks = int(self.monthly_work_no_breaks.total_seconds())
+        seconds_in_hour = 3600
+        seconds_in_minute = 60
+        hours = int(self.monthly_work_no_breaks / seconds_in_hour)
+        minutes = int(self.monthly_work_no_breaks % seconds_in_hour)
+        if minutes == 0:
+            minutes = "00"
+        else:
+            minutes = int(minutes / seconds_in_minute)
+        self.monthly_work_no_breaks = str(hours) + ":" + str(minutes)
+
+        template.save(filename)
+
+        doc = DocxTemplate(filename)
+
+        context = {'date': f"{month}/{year}",
+                   'work': work,
+                   'work_sum': self.monthly_work_no_breaks
+                   }
+        doc.render(context)
+        doc.save(filename)
+        
