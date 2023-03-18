@@ -3,8 +3,8 @@ from tkinter import ttk
 from datetime import datetime
 from datetime import timedelta
 from db import Database
-import docx
-from docxtpl import DocxTemplate
+import docx                         # pip install python-docx
+from docxtpl import DocxTemplate    # pip install docxtpl
 
 class Frame_Export(tk.Frame):
     def __init__(self, master, config: dict):
@@ -161,8 +161,41 @@ class Frame_Export(tk.Frame):
                     shift = [str(date), str(work_day[1]), str(work_day[2]), str(work_day[3])]
             worked.append(shift)
 
-        for line in worked:
-            print(line)
+        #make sure table is always 31 rows long
+        first_half = []
+        second_half = []
+        length = 31         # max days in month
+        modified = False
+        
+        if len(worked) == 30:
+            first_half = worked[0:20]   # get all days from previous month to the 28th
+            second_half = worked[-10:]
+            buffer = [" ", " ", " ", " "]
+            modified = True
+        elif len(worked) == 29:
+            first_half = worked[0:19]   # get all days from previous month to the 28th
+            second_half = worked[-10:]
+            buffer = [" ", " ", " ", " "],[" ", " ", " ", " "]
+            modified = True
+        elif len(worked) == 28:
+            first_half = worked[0:18]   # get all days from previous month to the 28th
+            second_half = worked[-10:]
+            buffer = [" ", " ", " ", " "],[" ", " ", " ", " "],[" ", " ", " ", " "]
+            modified = True
+
+        if modified == True:
+            worked = []
+            for elem in first_half:
+                worked.append(elem)
+            for elem in buffer:
+                worked.append(elem)
+            for elem in second_half:
+                worked.append(elem)
+
+        #print(len(worked))
+
+        #for line in worked:
+        #    print(line)
 
         return worked
 
